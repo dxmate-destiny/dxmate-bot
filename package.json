@@ -1,0 +1,19 @@
+{
+  "name": "dxmate-bot",
+  "version": "1.0.0",
+  "description": "DXmate Discord Bot application.",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/dxmate-destiny/dxmate-bot.git"
+  },
+  "author": "Destiny",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/dxmate-destiny/dxmate-bot/issues"
+  },
+  "homepage": "https://github.com/dxmate-destiny/dxmate-bot#readme"
+}
