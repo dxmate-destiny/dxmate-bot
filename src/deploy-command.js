@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('node:path');
-const { REST } = require('discord.js');
+const { REST, Routes } = require('discord.js');
 
 const commands = [];
 
@@ -48,7 +48,7 @@ const rest = new REST().setToken(process.env.DISCORD_BOT_TOKEN);
 
         // The put method is used to fully refresh all commands in the guild with the current set.
 		const data = await rest.put(
-			Routes.applicationGuildCommands(clientId, guildId),
+			Routes.applicationGuildCommands(process.env.DISCORD_BOT_CLIENT_ID, process.env.DXMATE_DISCORD_SERVER_GUILD_ID),
 			{ body: commands },
 		);
 

@@ -74,3 +74,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
     console.log(`${user.tag} added reaction: ${reaction.emoji.name}`);
 });
+
+// Log in to Discord.
+client.login(process.env.DISCORD_BOT_TOKEN);
