@@ -15,5 +15,8 @@
   "bugs": {
     "url": "https://github.com/dxmate-destiny/dxmate-bot/issues"
   },
-  "homepage": "https://github.com/dxmate-destiny/dxmate-bot#readme"
+  "homepage": "https://github.com/dxmate-destiny/dxmate-bot#readme",
+  "dependencies": {
+    "discord.js": "^14.14.1"
+  }
 }
