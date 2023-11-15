@@ -1,8 +1,12 @@
 const fs = require('fs');
 const path = require('node:path');
-const { Client, GatewayIntentBits, Collection, Events } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Events, EmbedBuilder } = require('discord.js');
+const { default: axios } = require('axios');
 
-// Craete Discord Bot client instance.
+// Get DXmate API base URL.
+const dxmateApiBaseUrl = process.env.DXMATE_API_BASE_URL;
+
+// Create Discord Bot client instance.
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions] });
 
 // Create collection instance.
@@ -73,6 +77,133 @@ client.on(Events.InteractionCreate, async (interaction) => {
 
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
     console.log(`${user.tag} added reaction: ${reaction.emoji.name}`);
+
+    if (user.bot) return;
+
+    // Get reacted message.
+    const message = reaction.message;
+
+    if (!message.author.bot) return;
+
+    if (!message.interaction) return;
+
+    // Get command.
+    const commandName = message.interaction.commandName;
+    console.log('Retrieved Command Name:', commandName);
+
+    if (commandName !== 'matchmake') return;
+
+    // Get Report ID (Message ID).
+    const reportId = message.id;
+    console.log('Retrieved Report ID:', reportId);
+
+    // Get Report data.
+    const getReportDataResponse = await axios.get(dxmateApiBaseUrl + `/reports/${reportId}`);
+    console.log('Retrieved Report data:', getReportDataResponse.data);
+
+    if (getReportDataResponse.data.matchMode.includes('unranked')) return;
+
+    if (getReportDataResponse.data.matchMode.includes('singles')) {
+
+        if (reaction.emoji.name === '1️⃣') {
+            // Get emoji count.
+            const reactionCount = message.reactions.cache.get('1️⃣').count;
+            console.log(`Reaction ${reaction.emoji.name} count:`, reactionCount);
+
+            if (reactionCount === 3) {
+                // Get Winner Discord ID.
+                const winnerDiscordId = getReportDataResponse.data['1️⃣'];
+                console.log('Winner Discord ID:', winnerDiscordId);
+
+                // Get Loser Discord ID.
+                const loserDiscordId = getReportDataResponse.data['2️⃣'];
+                console.log('Loser Discord ID:', loserDiscordId);
+
+                // Get room data.
+                const getRoomDataResponse = await axios.get(dxmateApiBaseUrl + `/rooms/${getReportDataResponse.data.roomId}`);
+                console.log('Retrieved Room data:', getRoomDataResponse.data);
+
+                // Get players field.
+                const players = getRoomDataResponse.data.players;
+
+                // Get Winner player data.
+                const winnerPlayerData = players.find(player => player.discordUserData.id === winnerDiscordId);
+                console.log('Retrieved winner player data:', winnerPlayerData);
+
+                // Get Loser player data.
+                const loserPlayerData = players.find(player => player.discordUserData.id === loserDiscordId);
+                console.log('Retrieved loser player data:', loserPlayerData);
+
+                // Get winner skill.
+                const winnerSkill = winnerPlayerData.skill.singles;
+                console.log('Retrieved winner skill:', winnerSkill);
+
+                // Get loser skill.
+                const loserSkill = loserPlayerData.skill.singles;
+                console.log('Retrieved loser skill:', loserSkill);
+
+                // Update skill.
+                const updateSkillResponse = await axios.post(dxmateApiBaseUrl + '/skill/update', {
+                    winnerSkill,
+                    loserSkill
+                });
+                console.log('Updated skill:', updateSkillResponse.data);
+
+                // Save updated skill.
+                await axios.post(dxmateApiBaseUrl + '/players/skill/update', {
+                    discordId: winnerDiscordId,
+                    skill: updateSkillResponse.data.winner
+                });
+                console.log('Saved updated winner skill.');
+
+                await axios.post(dxmateApiBaseUrl + '/players/skill/update', {
+                    discordId: loserDiscordId,
+                    skill: updateSkillResponse.data.loser
+                });
+                console.log('Saved updated loser skill.');
+
+                // Get updated Rank Points.
+                const getWinnerRankPointsResponse = await axios.get(dxmateApiBaseUrl + '/rank', {
+                    params: {
+                        mu: updateSkillResponse.data.winner.mu,
+                        sigma: updateSkillResponse.data.winner.sigma
+                    }
+                });
+                console.log('Retrieved Updated winner Rank data:', getWinnerRankPointsResponse.data);
+
+                // Get updated Rank Points.
+                const getLoserRankPointsResponse = await axios.get(dxmateApiBaseUrl + '/rank', {
+                    params: {
+                        mu: updateSkillResponse.data.loser.mu,
+                        sigma: updateSkillResponse.data.loser.sigma
+                    }
+                });
+                console.log('Retrieved Updated winner Rank data:', getLoserRankPointsResponse.data);
+
+                // Create match result embed.
+                const matchResultEmbed = new EmbedBuilder()
+                .setColor(0x0099FF)
+                .setTitle('Ranked Singles Result')
+                .addFields(
+                    { name: 'Winner', value: `<@${winnerDiscordId}>`, inline: true },
+                    { name: 'Before Rank', value: `${winnerPlayerData.rankData.name} ${winnerPlayerData.rankData.points} RP`, inline: true },
+                    { name: 'After Rank', value: `${getWinnerRankPointsResponse.data.name} ${getWinnerRankPointsResponse.data.points} RP`, inline: true },
+                    { name: 'Loser', value: `<@${loserDiscordId}>`, inline: true },
+                    { name: 'Before Rank', value: `${loserPlayerData.rankData.name} ${loserPlayerData.rankData.points} RP`, inline: true },
+                    { name: 'After Rank', value: `${getLoserRankPointsResponse.data.name} ${getLoserRankPointsResponse.data.points} RP`, inline: true }
+                );
+
+                // Get channel.
+                const channel = reaction.message.channel;
+
+                // Send match result embed.
+                return await channel.send({ embeds: [matchResultEmbed] });
+            }
+        } else if (reaction.emoji.name === '2️⃣') {
+        }
+    } else {
+
+    }
 });
 
 // Log in to Discord.

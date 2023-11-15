@@ -1,6 +1,7 @@
 const { default: axios } = require('axios');
 const { SlashCommandBuilder } = require('discord.js');
 
+// Get DXmate API base URL.
 const dxmateApiBaseUrl = process.env.DXMATE_API_BASE_URL;
 
 module.exports = {
@@ -17,7 +18,7 @@ module.exports = {
         .setName('region')
         .setDescription('Select your region.')
         .setRequired(true)
-        .addChoices(
+        .setChoices(
             { name: 'North America', value: 'na' },
             { name: 'Latin America & the Caribbean', value: 'lac' },
             { name: 'Europe', value: 'eu' },

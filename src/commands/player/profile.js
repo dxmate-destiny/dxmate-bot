@@ -1,6 +1,7 @@
 const { default: axios } = require('axios');
 const { SlashCommandBuilder, EmbedBuilder } = require('discord.js');
 
+// Get DXmate API base URL.
 const dxmateApiBaseUrl = process.env.DXMATE_API_BASE_URL;
 
 // Region map
@@ -53,7 +54,7 @@ module.exports = {
                 sigma: getDxmatePlayerDataResponse.data.skill.singles.sigma
             }
         });
-        console.log('Retrieved Singles Skill:', getSinglesRankDataResponse.data);
+        console.log('Retrieved Singles Rank data:', getSinglesRankDataResponse.data);
 
         // Get Doubles Rank data.
         const getDoublesRankDataResponse = await axios.get(dxmateApiBaseUrl + '/rank', {
@@ -62,7 +63,7 @@ module.exports = {
                 sigma: getDxmatePlayerDataResponse.data.skill.doubles.sigma
             }
         });
-        console.log('Retrieved Doubles Skill:', getDoublesRankDataResponse.data);
+        console.log('Retrieved Doubles Rank data:', getDoublesRankDataResponse.data);
 
         // Create DXmate player profile embed.
         const dxmatePlayerProfileEmbed = new EmbedBuilder()
