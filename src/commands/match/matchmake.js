@@ -20,7 +20,8 @@ module.exports = {
                 { name: 'Ranked Doubles', value: 'ranked_doubles' },
                 { name: 'Unranked Singles', value: 'unranked_singles' },
                 { name: 'Unranked Doubles', value: 'unranked_doubles' }
-            )),
+            )
+            .setRequired(true)),
 	async execute(interaction) {
         // Defer reply.
         await interaction.deferReply();
