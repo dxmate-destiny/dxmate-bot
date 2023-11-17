@@ -163,13 +163,13 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         const loserAfterSkill = updateSkillResponse.data.loser;
 
         // Save updated skill.
-        await axios.post(dxmateApiBaseUrl + '/players/skill/update', {
+        await axios.post(dxmateApiBaseUrl + '/players/skill/singles/update', {
             discordId: winnerDiscordId,
             skill: winnerAfterSkill
         });
 
-        await axios.post(dxmateApiBaseUrl + '/players/skill/update', {
-            discordId: winnerDiscordId,
+        await axios.post(dxmateApiBaseUrl + '/players/skill/singles/update', {
+            discordId: loserDiscordId,
             skill: loserAfterSkill
         });
         console.log('Saved updated skill.');
@@ -301,22 +301,22 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         console.log('Updated loser players skill:', { loser1AfterSkill, loser2AfterSkill });
 
         // Save updated skill.
-        await axios.post(dxmateApiBaseUrl + '/players/skill/update', {
+        await axios.post(dxmateApiBaseUrl + '/players/skill/doubles/update', {
             discordId: winner1DiscordId,
             skill: winner1AfterSkill
         });
 
-        await axios.post(dxmateApiBaseUrl + '/players/skill/update', {
+        await axios.post(dxmateApiBaseUrl + '/players/skill/doubles/update', {
             discordId: winner2DiscordId,
             skill: winner2AfterSkill
         });
 
-        await axios.post(dxmateApiBaseUrl + '/players/skill/update', {
+        await axios.post(dxmateApiBaseUrl + '/players/skill/doubles/update', {
             discordId: loser1DiscordId,
             skill: loser1AfterSkill
         });
 
-        await axios.post(dxmateApiBaseUrl + '/players/skill/update', {
+        await axios.post(dxmateApiBaseUrl + '/players/skill/doubles/update', {
             discordId: loser2DiscordId,
             skill: loser2AfterSkill
         });
