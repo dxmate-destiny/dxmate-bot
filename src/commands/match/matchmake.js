@@ -174,7 +174,7 @@ module.exports = {
 
             return;
         }
-        
+
         // If Match Mode is doubles, create team.
         if (matchMode.includes('doubles')) {
             // Create team.
@@ -211,14 +211,21 @@ module.exports = {
         } else {
             // Link color ball and team.
             reportData = {
-                '🔴': 'red',
-                '🔵': 'blue'
+                '🔴': [],
+                '🔵': []
             }
 
             for (var i = 0; i < roomData.players.length; i++) {
                 // Get player data.
                 const playerData = roomData.players[i];
                 console.log('Player Data:', playerData);
+
+                // Add Discord ID.
+                if (playerData.team === 'red') {
+                    reportData['🔴'].push(playerData.discordUserData.id);
+                } else {
+                    reportData['🔵'].push(playerData.discordUserData.id);
+                }
 
                 // Add player data to embed.
                 matchmakingCompleteEmbed.addFields(
