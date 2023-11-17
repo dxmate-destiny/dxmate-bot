@@ -146,8 +146,8 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         console.log('Retrieved loser player data:', loserPlayerData);
 
         // Get before skill.
-        const winnerBeforeSkill = winnerPlayerData.skill.singles;
-        const loserBeforeSkill = loserPlayerData.skill.singles;
+        const winnerBeforeSkill = winnerPlayerData.dxmatePlayerData.skill.singles;
+        const loserBeforeSkill = loserPlayerData..dxmatePlayerData.skill.singles;
         console.log('Retrieved winner before skill:', winnerBeforeSkill);
         console.log('Retrieved loser before skill:', loserBeforeSkill);
 
@@ -276,10 +276,10 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         console.log('Retrieved loser players data:', { loser1PlayerData, loser2PlayerData });
 
         // Get before skill.
-        const winner1BeforeSkill = winner1PlayerData.skill.doubles;
-        const winner2BeforeSkill = winner2PlayerData.skill.doubles;
-        const loser1BeforeSkill = loser1PlayerData.skill.doubles;
-        const loser2BeforeSkill = loser2PlayerData.skill.doubles;
+        const winner1BeforeSkill = winner1PlayerData.dxmatePlayerData.skill.doubles;
+        const winner2BeforeSkill = winner2PlayerData.dxmatePlayerData.skill.doubles;
+        const loser1BeforeSkill = loser1PlayerData.dxmatePlayerData.skill.doubles;
+        const loser2BeforeSkill = loser2PlayerData.dxmatePlayerData.skill.doubles;
 
         console.log('Retrieved winner before skills:', { winner1BeforeSkill, winner2BeforeSkill });
         console.log('Retrieved loser before skills:', { loser1BeforeSkill, loser2BeforeSkill });
