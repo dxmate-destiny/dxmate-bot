@@ -217,11 +217,11 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         .setTitle('Ranked Singles Result')
         .addFields(
             { name: 'Winner', value: `<@${winnerDiscordId}>`, inline: true },
-            { name: 'Before Rank', value: `${winnerBeforeRankData.name} ${winnerBeforeRankData.points} RP`, inline: true },
-            { name: 'After Rank', value: `${winnerAfterRankData.name} ${winnerAfterRankData.points} RP`, inline: true },
+            { name: 'Before', value: `${winnerBeforeRankData.name} ${winnerBeforeRankData.points} RP`, inline: true },
+            { name: 'After', value: `${winnerAfterRankData.name} ${winnerAfterRankData.points} RP`, inline: true },
             { name: 'Loser', value: `<@${loserDiscordId}>`, inline: true },
-            { name: 'Before Rank', value: `${loserBeforeRankData.name} ${loserBeforeRankData.points} RP`, inline: true },
-            { name: 'After Rank', value: `${loserAfterRankData.name} ${loserAfterRankData.points} RP`, inline: true }
+            { name: 'Before', value: `${loserBeforeRankData.name} ${loserBeforeRankData.points} RP`, inline: true },
+            { name: 'After', value: `${loserAfterRankData.name} ${loserAfterRankData.points} RP`, inline: true }
         );
 
         // Get channel.
@@ -383,17 +383,17 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         .setTitle('Ranked Doubles Result')
         .addFields(
             { name: 'Winner 1️⃣', value: `<@${winner1DiscordId}>`, inline: true },
-            { name: 'Before Rank', value: `${winner1BeforeRankData.name} ${winner1BeforeRankData.points} RP`, inline: true },
-            { name: 'After Rank', value: `${winner1AfterRankData.name} ${winner1AfterRankData.points} RP`, inline: true },
+            { name: 'Before', value: `${winner1BeforeRankData.name} ${winner1BeforeRankData.points} RP`, inline: true },
+            { name: 'After', value: `${winner1AfterRankData.name} ${winner1AfterRankData.points} RP`, inline: true },
             { name: 'Winner 2️⃣', value: `<@${winner2DiscordId}>`, inline: true },
-            { name: 'Before Rank', value: `${winner2BeforeRankData.name} ${winner2BeforeRankData.points} RP`, inline: true },
-            { name: 'After Rank', value: `${winner2AfterRankData.name} ${winner2AfterRankData.points} RP`, inline: true },
+            { name: 'Before', value: `${winner2BeforeRankData.name} ${winner2BeforeRankData.points} RP`, inline: true },
+            { name: 'After', value: `${winner2AfterRankData.name} ${winner2AfterRankData.points} RP`, inline: true },
             { name: 'Loser 1️⃣', value: `<@${loser1DiscordId}>`, inline: true },
-            { name: 'Before Rank', value: `${loser1BeforeRankData.name} ${loser1BeforeRankData.points} RP`, inline: true },
-            { name: 'After Rank', value: `${loser1AfterRankData.name} ${loser1AfterRankData.points} RP`, inline: true },
+            { name: 'Before', value: `${loser1BeforeRankData.name} ${loser1BeforeRankData.points} RP`, inline: true },
+            { name: 'After', value: `${loser1AfterRankData.name} ${loser1AfterRankData.points} RP`, inline: true },
             { name: 'Loser 2️⃣', value: `<@${loser2DiscordId}>`, inline: true },
-            { name: 'Before Rank', value: `${loser2BeforeRankData.name} ${loser2BeforeRankData.points} RP`, inline: true },
-            { name: 'After Rank', value: `${loser2AfterRankData.name} ${loser2AfterRankData.points} RP`, inline: true },
+            { name: 'Before', value: `${loser2BeforeRankData.name} ${loser2BeforeRankData.points} RP`, inline: true },
+            { name: 'After', value: `${loser2AfterRankData.name} ${loser2AfterRankData.points} RP`, inline: true },
         );
 
         // Get channel.
@@ -445,7 +445,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         const channel = reaction.message.channel;
 
         // Send match cancel complete reply.
-        channel.send(`${mentionedPlayers} Canceled match.`);
+        return await channel.send(`${mentionedPlayers} Canceled match.`);
     }
 });
 
