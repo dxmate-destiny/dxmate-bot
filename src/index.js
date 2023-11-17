@@ -147,7 +147,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
         // Get before skill.
         const winnerBeforeSkill = winnerPlayerData.dxmatePlayerData.skill.singles;
-        const loserBeforeSkill = loserPlayerData..dxmatePlayerData.skill.singles;
+        const loserBeforeSkill = loserPlayerData.dxmatePlayerData.skill.singles;
         console.log('Retrieved winner before skill:', winnerBeforeSkill);
         console.log('Retrieved loser before skill:', loserBeforeSkill);
 
