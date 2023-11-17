@@ -115,7 +115,7 @@ module.exports = {
             const searchingEmbed = new EmbedBuilder()
             .setColor(0x0099FF)
             .addFields(
-                { name: 'Match Mode', value: matchMode, inline: true },
+                { name: 'Match Mode', value: convertToMatchModeName(matchMode), inline: true },
                 { name: 'Players', value: `${getRoomDataResponse.data.players.length}/${maxPlayerCount}`, inline: true },
                 { name: 'Status', value: 'Searching opponent...', inline: true }
             );
@@ -142,7 +142,7 @@ module.exports = {
                         const searchingEmbed = new EmbedBuilder()
                         .setColor(0x0099FF)
                         .addFields(
-                            { name: 'Match Mode', value: matchMode, inline: true },
+                            { name: 'Match Mode', value: convertToMatchModeName(matchMode), inline: true },
                             { name: 'Players', value: `${getCurrentRoomDataResponse.data.players.length}/${maxPlayerCount}`, inline: true },
                             { name: 'Status', value: 'Searching opponent...', inline: true }
                         );
