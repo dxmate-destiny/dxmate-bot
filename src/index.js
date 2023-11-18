@@ -2,9 +2,13 @@ const fs = require('fs');
 const path = require('node:path');
 const { Client, GatewayIntentBits, Collection, Events, EmbedBuilder, Emoji } = require('discord.js');
 const { default: axios } = require('axios');
+const { setTimeout } = require('timers/promises');
 
 // Get DXmate API base URL.
 const dxmateApiBaseUrl = process.env.DXMATE_API_BASE_URL;
+
+// Reaction Process flags.
+let reactionProcessingFlags = {};
 
 // Create Discord Bot client instance.
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions] });
@@ -97,6 +101,19 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     const reportId = message.id;
     console.log('Retrieved Report ID:', reportId);
 
+    if (!reactionProcessingFlags[reportId]) {
+        reactionProcessingFlags[reportId] = false;
+    }
+
+    // If reaction processing, wait until it finishes.
+    while(reactionProcessingFlags[reportId]) {
+        // Wait 5 sec.
+        await setTimeout(5000);
+        console.log('Waiting for reaction process completing...');
+    }
+
+    reactionProcessingFlags[reportId] = true;
+
     // Get Report data.
     const getReportDataResponse = await axios.get(dxmateApiBaseUrl + `/reports/${reportId}`);
     console.log('Retrieved Report data:', getReportDataResponse.data);
@@ -113,7 +130,10 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
     if (emoji === '1️⃣' || emoji === '2️⃣') {
 
-        if (getReportDataResponse.data.matchMode !== 'ranked_singles') return;
+        if (getReportDataResponse.data.matchMode !== 'ranked_singles') {
+            reactionProcessingFlags[reportId] = false;
+            return;
+        }
 
         // Get reaction count.
         const player1ReactionCount = message.reactions.cache.get('1️⃣').count;
@@ -122,7 +142,10 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         const player2ReactionCount = message.reactions.cache.get('2️⃣').count;
         console.log('2️⃣ reaction count:', player2ReactionCount);
 
-        if (player1ReactionCount !== 3 && player2ReactionCount !== 3) return;
+        if (player1ReactionCount !== 3 && player2ReactionCount !== 3) {
+            reactionProcessingFlags[reportId] = false;
+            return;
+        }
 
         let winnerDiscordId;
         let loserDiscordId;
@@ -239,12 +262,18 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         const channel = reaction.message.channel;
 
         // Send match result embed.
-        return await channel.send({ embeds: [matchResultEmbed] });
+        await channel.send({ embeds: [matchResultEmbed] });
+
+        // Delete flag.
+        return delete reactionProcessingFlags[reportId];
     }
 
     if (emoji === '🔴' || emoji === '🔵') {
 
-        if (getReportDataResponse.data.matchMode !== 'ranked_doubles') return;
+        if (getReportDataResponse.data.matchMode !== 'ranked_doubles') {
+            reactionProcessingFlags[reportId] = false;
+            return;
+        }
 
         // Get reaction count.
         const redReactionCount = message.reactions.cache.get('🔴').count;
@@ -253,7 +282,10 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         const blueReactionCount = message.reactions.cache.get('🔵').count;
         console.log('🔵 reaction count:', blueReactionCount);
 
-        if (redReactionCount !== 5 && blueReactionCount !== 5) return;
+        if (redReactionCount !== 5 && blueReactionCount !== 5) {
+            reactionProcessingFlags[reportId] = false;
+            return;
+        }
 
         let winner1DiscordId;
         let winner2DiscordId;
@@ -430,7 +462,10 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         const channel = reaction.message.channel;
 
         // Send match result embed.
-        return await channel.send({ embeds: [matchResultEmbed] });
+        await channel.send({ embeds: [matchResultEmbed] });
+
+        // Delete flag.
+        return delete reactionProcessingFlags[reportId];
     }
 
     if (emoji === '❌') {
@@ -442,13 +477,19 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
         if (getReportDataResponse.data.matchMode === 'ranked_singles') {
             
-            if (cancelReactionCount !== 3) return;
+            if (cancelReactionCount !== 3) {
+                reactionProcessingFlags[reportId] = false;
+                return;
+            }
 
             discordIds.push(getReportDataResponse.data['1️⃣']);
             discordIds.push(getReportDataResponse.data['2️⃣']);
         } else {
 
-            if (cancelReactionCount !== 5) return;
+            if (cancelReactionCount !== 5) {
+                reactionProcessingFlags[reportId] = false;
+                return;
+            }
 
             discordIds.push(getReportDataResponse.data['🔴'][0]);
             discordIds.push(getReportDataResponse.data['🔴'][1]);
@@ -475,8 +516,13 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         const channel = reaction.message.channel;
 
         // Send match cancel complete reply.
-        return await channel.send(`${mentionedPlayers} Canceled match.`);
+        await channel.send(`${mentionedPlayers} Canceled match.`);
+
+        // Delete flag.
+        return delete reactionProcessingFlags[reportId];
     }
+
+    reactionProcessingFlags[reportId] = false;
 });
 
 // Log in to Discord.
