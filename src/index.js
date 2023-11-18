@@ -174,6 +174,17 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         });
         console.log('Saved updated skill.');
 
+        // Add Ranked Singles match count.
+        await axios.post(dxmateApiBaseUrl + '/players/ranked-match-count/singles/add', {
+            discordId: winnerDiscordId
+        });
+
+        await axios.post(dxmateApiBaseUrl + '/players/ranked-match-count/singles/add', {
+            discordId: loserDiscordId
+        });
+
+        console.log('Added Ranked Singles match count.');
+
         // Get before Rank data.
         const winnerBeforeRankData = winnerPlayerData.rankData;
         const loserBeforeRankData = loserPlayerData.rankData;
@@ -322,6 +333,25 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         });
 
         console.log('Saved updated skill.');
+
+        // Add Ranked Doubles count.
+        await axios.post(dxmateApiBaseUrl + '/players/ranked-match-count/doubles/add', {
+            discordId: winner1DiscordId
+        });
+
+        await axios.post(dxmateApiBaseUrl + '/players/ranked-match-count/doubles/add', {
+            discordId: winner2DiscordId
+        });
+
+        await axios.post(dxmateApiBaseUrl + '/players/ranked-match-count/doubles/add', {
+            discordId: loser1DiscordId
+        });
+
+        await axios.post(dxmateApiBaseUrl + '/players/ranked-match-count/doubles/add', {
+            discordId: loser2DiscordId
+        });
+
+        console.log('Added Ranked Doubles match count.');
 
         // Get before Rank Data.
         const winner1BeforeRankData = winner1PlayerData.rankData;
