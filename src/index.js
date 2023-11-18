@@ -118,7 +118,9 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     const getReportDataResponse = await axios.get(dxmateApiBaseUrl + `/reports/${reportId}`);
     console.log('Retrieved Report data:', getReportDataResponse.data);
 
-    if (getReportDataResponse.data.matchMode.includes('unranked')) return;
+    if (!getReportDataResponse.data) return;
+
+    if (getReportDataResponse.data.matchMode.includes('unranked')) return delete reactionProcessingFlags[reportId];
 
     // Get room data.
     const getRoomDataResponse = await axios.get(dxmateApiBaseUrl + `/rooms/${getReportDataResponse.data.roomId}`);
