@@ -164,7 +164,7 @@ module.exports = {
         const myPlayerData = roomData.players.find(item => item.discordUserData.id === discordUserData.id);
         console.log('Retrieved my player data:', myPlayerData);
 
-        if (myPlayerData.isHost) {
+        if (!myPlayerData.isHost) {
             // Get defering reply.
             const deferingReply = await interaction.fetchReply();
 
