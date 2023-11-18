@@ -211,10 +211,8 @@ module.exports = {
             }
         } else {
             // Link color ball and team.
-            reportData = {
-                '🔴': [],
-                '🔵': []
-            }
+            reportData['🔴'] = [];
+            reportData['🔵'] = [];
 
             for (var i = 0; i < roomData.players.length; i++) {
                 // Get player data.
