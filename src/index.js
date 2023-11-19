@@ -369,14 +369,14 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
             // Save updated skill.
             for (let i = 0; i < afterSkill.winner.length; i++) {
-                await axios.post(dxmateApiBaseUrl + 'players/skill/doubles/update', {
+                await axios.post(dxmateApiBaseUrl + '/players/skill/doubles/update', {
                     discordId: discordIds.winner[i],
                     skill: afterSkill.winner[i]
                 });
             }
 
             for (let i = 0; i < afterSkill.loser.length; i++) {
-                await axios.post(dxmateApiBaseUrl + 'players/skill/doubles/update', {
+                await axios.post(dxmateApiBaseUrl + '/players/skill/doubles/update', {
                     discordId: discordIds.loser[i],
                     skill: afterSkill.loser[i]
                 });
