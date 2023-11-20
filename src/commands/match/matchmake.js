@@ -254,6 +254,8 @@ module.exports = {
         // Send matchmaking complete emebd.
         const matchmakingCompletedMessage = await interaction.editReply({ embeds: [matchmakingCompleteEmbed], ephemeral: true });
 
+        if (matchMode.includes('unranked')) return;
+
         // Get Report ID (Message ID).
         const reportId = matchmakingCompletedMessage.id;
         console.log('Retrieved Report ID:', reportId);
