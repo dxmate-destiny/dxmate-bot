@@ -131,6 +131,8 @@ module.exports = {
             // Send searching embed.
             await interaction.editReply({ embeds: [searchingEmbed], ephemeral: true });
 
+            let waitCount = 0;
+
             while (!isRoomFull) {
                 // Wait 5 sec.
                 await setTimeout(5000);
@@ -143,6 +145,14 @@ module.exports = {
                 console.log('Room is full:', isRoomFull);
 
                 if (!isRoomFull) {
+                    waitCount++;
+                    console.log('Added Wait count:', waitCount);
+
+                    if (waitCount === 36) {
+                        console.log('Timed out.');
+                        return await interaction.editReply(`<@${discordUserData.id}> Matchmaking has timed out.`);
+                    }
+
                     if (!isEqual(roomData, getCurrentRoomDataResponse.data)) {
                         console.log('Room data has been updated.');
 
