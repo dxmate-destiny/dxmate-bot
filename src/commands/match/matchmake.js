@@ -150,7 +150,24 @@ module.exports = {
 
                     if (waitCount === 36) {
                         console.log('Timed out.');
-                        return await interaction.editReply(`<@${discordUserData.id}> Matchmaking has timed out.`);
+
+                        // Delete room data.
+                        await axios.post(dxmateApiBaseUrl + '/rooms/delete', {
+                            roomId
+                        });
+                        console.log('Deleted room data.');
+
+                        // Get defering reply.
+                        const deferingReply = await interaction.fetchReply();
+
+                        if (deferingReply) {
+                            // Delete defering reply.
+                            await deferingReply.delete();
+                            console.log('Deleted defering reply.');
+                        }
+
+                        // Send timeout message.
+                        return await interaction.reply(`<@${discordUserData.id}> Matchmaking has timed out.`);
                     }
 
                     if (!isEqual(roomData, getCurrentRoomDataResponse.data)) {
