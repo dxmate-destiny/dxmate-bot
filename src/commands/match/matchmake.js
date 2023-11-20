@@ -251,7 +251,7 @@ module.exports = {
             { name: 'Starter Stage', value: 'Battlefield', inline: true }
         );
 
-        if (matchMode.includes(doubles)) {
+        if (matchMode.includes('doubles')) {
             // Create Doubles Connect Code.
             const createDoublesConnectCode = await axios.get(dxmateApiBaseUrl + '/rooms/team/connect-code/create');
             console.log('Created Doubles connect code:', createDoublesConnectCode.data);
