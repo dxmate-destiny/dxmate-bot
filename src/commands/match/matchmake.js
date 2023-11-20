@@ -251,12 +251,21 @@ module.exports = {
             { name: 'Starter Stage', value: 'Battlefield', inline: true }
         );
 
+        if (matchMode.includes(doubles)) {
+            // Create Doubles Connect Code.
+            const createDoublesConnectCode = await axios.get(dxmateApiBaseUrl + '/rooms/team/connect-code/create');
+            console.log('Created Doubles connect code:', createDoublesConnectCode.data);
+
+            // Add Doubles connect code to embed.
+            matchmakingCompleteEmbed.addFields({ name: 'Doubles Connect Code', value: createDoublesConnectCode.data, inline: true });
+        }
+
         // Send matchmaking complete emebd.
         const matchmakingCompletedMessage = await interaction.editReply({ embeds: [matchmakingCompleteEmbed], ephemeral: true });
 
         if (matchMode.includes('unranked')) {
             console.log('Unranked mode, so need to delete room data.');
-            
+
             // Delete room data.
             await axios.post(dxmateApiBaseUrl + '/rooms/delete', {
                 roomId
