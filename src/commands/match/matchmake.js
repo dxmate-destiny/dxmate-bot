@@ -167,7 +167,7 @@ module.exports = {
                         }
 
                         // Send timeout message.
-                        return await interaction.reply(`<@${discordUserData.id}> Matchmaking has timed out.`);
+                        return await interaction.channel.send(`<@${discordUserData.id}> Matchmaking has timed out.`);
                     }
 
                     if (!isEqual(roomData, getCurrentRoomDataResponse.data)) {
