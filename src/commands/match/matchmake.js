@@ -254,7 +254,18 @@ module.exports = {
         // Send matchmaking complete emebd.
         const matchmakingCompletedMessage = await interaction.editReply({ embeds: [matchmakingCompleteEmbed], ephemeral: true });
 
-        if (matchMode.includes('unranked')) return;
+        if (matchMode.includes('unranked')) {
+            console.log('Unranked mode, so need to delete room data.');
+            
+            // Delete room data.
+            await axios.post(dxmateApiBaseUrl + '/rooms/delete', {
+                roomId
+            });
+
+            console.log('Deleted room data.');
+
+            return;
+        };
 
         // Get Report ID (Message ID).
         const reportId = matchmakingCompletedMessage.id;
