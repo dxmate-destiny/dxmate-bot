@@ -38,6 +38,14 @@ module.exports = {
         };
         console.log('Retrieved Discord user data:', discordUserData);
 
+        // Check if player is in a match.
+        const checkPlayerInMatchResponse = await axios.get(dxmateApiBaseUrl + `/players/${discordUserData.id}/in-match/check`);
+
+        if (checkPlayerInMatchResponse.data) {
+            console.log('A player with this Discord ID is already in a match.');
+            return await interaction.editReply(`<@${discordUserData.id}> You are already in a match.`);
+        }
+
         // Get DXmate player data.
         const getDxmatePlayerDataResponse = await axios.get(dxmateApiBaseUrl + `/players/${discordUserData.id}`);
         console.log('Retrieved DXmate player data:', getDxmatePlayerDataResponse.data);
