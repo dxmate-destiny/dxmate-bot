@@ -230,7 +230,7 @@ module.exports = {
                 matchmakingCompleteEmbed.addFields(
                     { name: `Player ${convertNumberToEmoji(i + 1)}`, value: `<@${playerData.discordUserData.id}>`, inline: true },
                     { name: 'Team', value: `${convertTeamToEmoji(playerData.team)} ${convertTeamToName(playerData.team)}`, inline: true },
-                    { name: 'Rank', value: `${playerData.rankData.name} ${playerData.rankData.points}`, inline: true }
+                    { name: 'Rank', value: `${playerData.rankData.name} ${playerData.rankData.points} RP`, inline: true }
                 );
             }
         }
