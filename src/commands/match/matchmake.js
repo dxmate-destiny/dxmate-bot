@@ -148,7 +148,7 @@ module.exports = {
                     waitCount++;
                     console.log('Added Wait count:', waitCount);
 
-                    if (waitCount === 36) {
+                    if (waitCount === 25) {
                         console.log('Timed out.');
 
                         // Delete room data.
