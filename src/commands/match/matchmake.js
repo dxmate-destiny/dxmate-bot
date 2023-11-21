@@ -141,26 +141,58 @@ module.exports = {
                 const getCurrentRoomDataResponse = await axios.get(dxmateApiBaseUrl + `/rooms/${roomId}`);
                 console.log('Retrieved Room data:', getCurrentRoomDataResponse.data);
 
-                isRoomFull = getCurrentRoomDataResponse.data.players.length === maxPlayerCount;
-                console.log('Room is full:', isRoomFull);
+                // Get my player data.
+                const myPlayerData = getCurrentRoomDataResponse.data.players.find(item => item.discordUserData.id === discordUserData.id);
+                console.log('Retrieved my player data:', myPlayerData);
 
-                if (!isRoomFull) {
-                    waitCount++;
-                    console.log('Added Wait count:', waitCount);
+                if (myPlayerData.isHost) {
 
-                    if (waitCount === 25) {
-                        console.log('Timed out.');
+                    // Check if room is full.
+                    isRoomFull = getCurrentRoomDataResponse.data.players.length === maxPlayerCount;
+                    console.log('Room is full:', isRoomFull);
 
-                        // Get my player data.
-                        const myPlayerData = getCurrentRoomDataResponse.data.players.find(player => player.discordUserData.id === discordUserData.id);
+                    if (!isRoomFull) {
+                        waitCount++;
+                        console.log('Added wait count:', waitCount);
 
-                        if (myPlayerData.isHost) {
+                        if (waitCount === 25) {
+                            console.log('Timed out.');
+
                             // Delete room data.
                             await axios.post(dxmateApiBaseUrl + '/rooms/delete', {
                                 roomId
                             });
                             console.log('Deleted room data.');
+
+                            // Get defering reply.
+                            const deferingReply = await interaction.fetchReply();
+
+                            if (deferingReply) {
+                                // Delete defering reply.
+                                await deferingReply.delete();
+                                console.log('Deleted defering reply.');
+                            }
+
+                            // Send timeout message.
+                            return await interaction.channel.send(`<@${discordUserData.id}> Matchmaking has timed out.`);
                         }
+
+                        // Create searching embed.
+                        const searchingEmbed = new EmbedBuilder()
+                        .setColor(0x0099FF)
+                        .addFields(
+                            { name: 'Match Mode', value: convertToMatchModeName(matchMode), inline: true },
+                            { name: 'Players', value: `${getCurrentRoomDataResponse.data.players.length} / ${maxPlayerCount}`, inline: true },
+                            { name: 'Status', value: 'Searching opponent...', inline: true }
+                        );
+
+                        // Send updated searching embed.
+                        await interaction.editReply({ embeds: [searchingEmbed] });
+                    }
+                } else {
+
+                    if (!getCurrentRoomDataResponse.data) {
+                        console.log('Timed out.');
 
                         // Get defering reply.
                         const deferingReply = await interaction.fetchReply();
@@ -175,34 +207,22 @@ module.exports = {
                         return await interaction.channel.send(`<@${discordUserData.id}> Matchmaking has timed out.`);
                     }
 
-                    if (!isEqual(roomData, getCurrentRoomDataResponse.data)) {
-                        console.log('Room data has been updated.');
+                    // Create searching embed.
+                    const searchingEmbed = new EmbedBuilder()
+                    .setColor(0x0099FF)
+                    .addFields(
+                        { name: 'Match Mode', value: convertToMatchModeName(matchMode), inline: true },
+                        { name: 'Players', value: `${getCurrentRoomDataResponse.data.players.length} / ${maxPlayerCount}`, inline: true },
+                        { name: 'Status', value: 'Searching opponent...', inline: true }
+                    );
 
-                        // Create searchig embed.
-                        const searchingEmbed = new EmbedBuilder()
-                        .setColor(0x0099FF)
-                        .addFields(
-                            { name: 'Match Mode', value: convertToMatchModeName(matchMode), inline: true },
-                            { name: 'Players', value: `${getCurrentRoomDataResponse.data.players.length}/${maxPlayerCount}`, inline: true },
-                            { name: 'Status', value: 'Searching opponent...', inline: true }
-                        );
-
-                        // Send updated searching embed.
-                        await interaction.editReply({ embeds: [searchingEmbed] });
-                    }
-                } else {
-                    // Get room data.
-                    roomData = getCurrentRoomDataResponse.data;
-                    console.log('Retrieved Room data:', roomData);
+                    // Send updated searching embed.
+                    await interaction.editReply({ embeds: [searchingEmbed] });
                 }
             }
         }
 
         console.log('Matchmaking completed.');
-
-        // Get my player data from room data.
-        const myPlayerData = roomData.players.find(item => item.discordUserData.id === discordUserData.id);
-        console.log('Retrieved my player data:', myPlayerData);
 
         if (!myPlayerData.isHost) {
             // Get defering reply.
