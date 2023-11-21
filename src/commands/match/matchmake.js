@@ -26,7 +26,7 @@ module.exports = {
         // Defer reply.
         await interaction.deferReply();
 
-        // Get Match Mode from argument value.
+        // Get Match Mode from argument.
         const matchMode = interaction.options.getString('mode');
         console.log('Retrieved Match Mode:', matchMode);
 
@@ -50,16 +50,6 @@ module.exports = {
         const getDxmatePlayerDataResponse = await axios.get(dxmateApiBaseUrl + `/players/${discordUserData.id}`);
         console.log('Retrieved DXmate player data:', getDxmatePlayerDataResponse.data);
 
-        if (matchMode === 'unranked_singles') {
-            if (getDxmatePlayerDataResponse.data.rankedModeMatchCount.singles < 10) {
-                return await interaction.editReply({ content: 'To participate in Unranked Singles, you must play at least 10 matches in Ranked Singles.', ephemeral: true });
-            }
-        } else if (matchMode === 'unranked_doubles') {
-            if (getDxmatePlayerDataResponse.data.rankedModeMatchCount.doubles < 10) {
-                return await interaction.editReply({ content: 'To participate in Unranked Doubles, you must play at least 10 matches in Ranked Doubles.', ephemeral: true });
-            }
-        }
-
         // Get Skill for selected mode.
         const skill = matchMode.includes('singles') ? getDxmatePlayerDataResponse.data.skill.singles : getDxmatePlayerDataResponse.data.skill.doubles;
         console.log('Retrieved Skill:', skill);
@@ -73,6 +63,8 @@ module.exports = {
         });
         console.log('Retrieved Rank data:', getRankDataResponse.data);
 
+        let isHost = false;
+
         // Search room.
         const searchRoomResponse = await axios.post(dxmateApiBaseUrl + '/rooms/search', {
             matchMode,
@@ -81,15 +73,17 @@ module.exports = {
             rankData: getRankDataResponse.data
         });
 
-        // Get Room ID from search room response.
+        // Get Room ID.
         let roomId = searchRoomResponse.data;
-        console.log('[Search] Room ID:', roomId);
+        console.log('Joined Room ID:', roomId);
 
         if (!roomId) {
             console.log('Room not found, so need to create room.');
 
-            // Create room.
-            const createRoomResponse = await axios.post(dxmateApiBaseUrl + '/rooms', {
+            isHost = true;
+
+             // Create room.
+             const createRoomResponse = await axios.post(dxmateApiBaseUrl + '/rooms', {
                 matchMode,
                 discordUserData,
                 dxmatePlayerData: getDxmatePlayerDataResponse.data,
@@ -98,7 +92,7 @@ module.exports = {
 
             // Get Room ID from create room response.
             roomId = createRoomResponse.data;
-            console.log('[Create] Room ID:', roomId);
+            console.log('Created Room ID:', roomId);
         }
 
         // Get max player count.
@@ -107,17 +101,14 @@ module.exports = {
 
         // Get room data.
         const getRoomDataResponse = await axios.get(dxmateApiBaseUrl + `/rooms/${roomId}`);
-
-        // Get room data from response.
-        let roomData = getRoomDataResponse.data;
-        console.log('Retrieved Room data:', roomData);
+        console.log('Retrieved room data:', getRoomDataResponse.data);
 
         // Check if joined room is full.
         let isRoomFull = getRoomDataResponse.data.players.length === maxPlayerCount;
         console.log('Room is full:', isRoomFull);
 
         if (!isRoomFull) {
-            console.log('Room is not full.');
+            console.log('Rom is not full.');
 
             // Create seraching embed.
             const searchingEmbed = new EmbedBuilder()
@@ -131,29 +122,26 @@ module.exports = {
             // Send searching embed.
             await interaction.editReply({ embeds: [searchingEmbed], ephemeral: true });
 
-            let waitCount = 0;
+            if (isHost) {
 
-            while (!isRoomFull) {
-                // Wait 5 sec.
-                await setTimeout(5000);
+                let waitCount = 0;
 
-                // Get current room data.
-                const getCurrentRoomDataResponse = await axios.get(dxmateApiBaseUrl + `/rooms/${roomId}`);
-                console.log('Retrieved Room data:', getCurrentRoomDataResponse.data);
+                while (!isRoomFull) {
+                    // Wait 5 sec.
+                    await setTimeout(5000);
 
-                // Get my player data.
-                const myPlayerData = getCurrentRoomDataResponse.data.players.find(item => item.discordUserData.id === discordUserData.id);
-                console.log('Retrieved my player data:', myPlayerData);
+                    // Get curent room data.
+                    const getCurrentRoomDataResponse = await axios.get(dxmateApiBaseUrl + `/rooms/${roomId}`);
+                    console.log('Retrieved Room data:', getCurrentRoomDataResponse.data);
 
-                if (myPlayerData.isHost) {
-
-                    // Check if room is full.
+                    // Check if joined room is full.
                     isRoomFull = getCurrentRoomDataResponse.data.players.length === maxPlayerCount;
                     console.log('Room is full:', isRoomFull);
 
                     if (!isRoomFull) {
+                        // Add wait count.
                         waitCount++;
-                        console.log('Added wait count:', waitCount);
+                        console.log('Added wait count.');
 
                         if (waitCount === 25) {
                             console.log('Timed out.');
@@ -162,11 +150,12 @@ module.exports = {
                             await axios.post(dxmateApiBaseUrl + '/rooms/delete', {
                                 roomId
                             });
+                            
                             console.log('Deleted room data.');
 
                             // Get defering reply.
                             const deferingReply = await interaction.fetchReply();
-
+                            
                             if (deferingReply) {
                                 // Delete defering reply.
                                 await deferingReply.delete();
@@ -177,26 +166,35 @@ module.exports = {
                             return await interaction.channel.send(`<@${discordUserData.id}> Matchmaking has timed out.`);
                         }
 
-                        // Create searching embed.
+                        // Create searchig embed.
                         const searchingEmbed = new EmbedBuilder()
                         .setColor(0x0099FF)
                         .addFields(
                             { name: 'Match Mode', value: convertToMatchModeName(matchMode), inline: true },
-                            { name: 'Players', value: `${getCurrentRoomDataResponse.data.players.length} / ${maxPlayerCount}`, inline: true },
+                            { name: 'Players', value: `${getCurrentRoomDataResponse.data.players.length}/${maxPlayerCount}`, inline: true },
                             { name: 'Status', value: 'Searching opponent...', inline: true }
                         );
 
                         // Send updated searching embed.
                         await interaction.editReply({ embeds: [searchingEmbed] });
                     }
-                } else {
+                }
+            } else {
+
+                while (!isRoomFull) {
+                    // Wait 5 sec.
+                    await setTimeout(5000);
+
+                    // Get curent room data.
+                    const getCurrentRoomDataResponse = await axios.get(dxmateApiBaseUrl + `/rooms/${roomId}`);
+                    console.log('Retrieved Room data:', getCurrentRoomDataResponse.data);
 
                     if (!getCurrentRoomDataResponse.data) {
                         console.log('Timed out.');
 
                         // Get defering reply.
                         const deferingReply = await interaction.fetchReply();
-
+                            
                         if (deferingReply) {
                             // Delete defering reply.
                             await deferingReply.delete();
@@ -207,24 +205,16 @@ module.exports = {
                         return await interaction.channel.send(`<@${discordUserData.id}> Matchmaking has timed out.`);
                     }
 
-                    // Create searching embed.
-                    const searchingEmbed = new EmbedBuilder()
-                    .setColor(0x0099FF)
-                    .addFields(
-                        { name: 'Match Mode', value: convertToMatchModeName(matchMode), inline: true },
-                        { name: 'Players', value: `${getCurrentRoomDataResponse.data.players.length} / ${maxPlayerCount}`, inline: true },
-                        { name: 'Status', value: 'Searching opponent...', inline: true }
-                    );
-
-                    // Send updated searching embed.
-                    await interaction.editReply({ embeds: [searchingEmbed] });
+                    // Check if joined room is full.
+                    isRoomFull = getCurrentRoomDataResponse.data.players.length === maxPlayerCount;
+                    console.log('Room is full:', isRoomFull);
                 }
             }
         }
 
         console.log('Matchmaking completed.');
 
-        if (!myPlayerData.isHost) {
+        if (!isHost) {
             // Get defering reply.
             const deferingReply = await interaction.fetchReply();
 
@@ -236,7 +226,12 @@ module.exports = {
             return;
         }
 
-        // If Match Mode is doubles, create team.
+        // Get matchmaking completed room data.
+        const getMatchmakingCompletedRoomResponse = await axios.get(dxmateApiBaseUrl + `/rooms/${roomId}`);
+        console.log('Retrieved Room data:', getMatchmakingCompletedRoomResponse.data);
+
+        let roomData = getMatchmakingCompletedRoomResponse.data || {};
+
         if (matchMode.includes('doubles')) {
             // Create team.
             const createTeamResponse = await axios.post(dxmateApiBaseUrl + '/rooms/team/create', { players: roomData.players });
@@ -244,9 +239,16 @@ module.exports = {
 
             // Update players field.
             roomData.players = createTeamResponse.data;
+
+            // Create Doubles Connect Code.
+            const createDoublesConnectCodeResponse = await axios.get(dxmateApiBaseUrl + '/rooms/team/connect-code/create');
+            console.log('Created Doubles connect code:', createDoublesConnectCodeResponse.data);
+
+            // Add Doubles Connect Code to room data.
+            roomData.doublesConnectCode = createDoublesConnectCodeResponse.data;
         }
 
-        let reportData = { roomId, matchMode };
+        let reportData = { roomId, matchMode, roomData };
 
         // Create matchmaking complete embed message.
         let matchmakingCompleteEmbed = new EmbedBuilder()
@@ -254,10 +256,9 @@ module.exports = {
         .setTitle(convertToMatchModeName(matchMode));
 
         if (matchMode.includes('singles')) {
-            for (var i = 0; i < roomData.players.length; i++) {
+            for (let i = 0; i < roomData.players.length; i++) {
                 // Get player data.
                 const playerData = roomData.players[i];
-                console.log('Player Data:', playerData);
 
                 // Link the port number and Discord ID.
                 reportData[convertNumberToEmoji(i + 1)] = playerData.discordUserData.id;
@@ -295,7 +296,7 @@ module.exports = {
             }
         }
 
-        console.log('Created Report Data:', reportData);
+        console.log('Created report data:', reportData);
 
         // Add match config data to embed.
         matchmakingCompleteEmbed.addFields(
@@ -304,12 +305,8 @@ module.exports = {
         );
 
         if (matchMode.includes('doubles')) {
-            // Create Doubles Connect Code.
-            const createDoublesConnectCode = await axios.get(dxmateApiBaseUrl + '/rooms/team/connect-code/create');
-            console.log('Created Doubles connect code:', createDoublesConnectCode.data);
-
-            // Add Doubles connect code to embed.
-            matchmakingCompleteEmbed.addFields({ name: 'Doubles Connect Code', value: createDoublesConnectCode.data, inline: true });
+            // Add Doubles Connect Code to embed.
+            matchmakingCompleteEmbed.addFields({ name: 'Doubles Connect Code', value: roomData.doublesConnectCode, inline: true });
         }
 
         // Send matchmaking complete emebd.
@@ -326,7 +323,7 @@ module.exports = {
             console.log('Deleted room data.');
 
             return;
-        };
+        }
 
         // Get Report ID (Message ID).
         const reportId = matchmakingCompletedMessage.id;
@@ -337,7 +334,7 @@ module.exports = {
             reportId,
             reportData
         });
-        console.log('Saved Report data.')
+        console.log('Saved Report data.');
 
         if (matchMode.includes('singles')) {
             // Add Singles reaction.
