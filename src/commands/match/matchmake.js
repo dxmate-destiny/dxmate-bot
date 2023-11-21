@@ -151,11 +151,16 @@ module.exports = {
                     if (waitCount === 25) {
                         console.log('Timed out.');
 
-                        // Delete room data.
-                        await axios.post(dxmateApiBaseUrl + '/rooms/delete', {
-                            roomId
-                        });
-                        console.log('Deleted room data.');
+                        // Get my player data.
+                        const myPlayerData = getCurrentRoomDataResponse.data.players.find(player => player.discordUserData.id === discordUserData.id);
+
+                        if (myPlayerData.isHost) {
+                            // Delete room data.
+                            await axios.post(dxmateApiBaseUrl + '/rooms/delete', {
+                                roomId
+                            });
+                            console.log('Deleted room data.');
+                        }
 
                         // Get defering reply.
                         const deferingReply = await interaction.fetchReply();
