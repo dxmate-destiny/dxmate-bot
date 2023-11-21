@@ -122,6 +122,8 @@ module.exports = {
             // Send searching embed.
             await interaction.editReply({ embeds: [searchingEmbed], ephemeral: true });
 
+            console.log('Host:', isHost);
+
             if (isHost) {
 
                 let waitCount = 0;
@@ -141,7 +143,7 @@ module.exports = {
                     if (!isRoomFull) {
                         // Add wait count.
                         waitCount++;
-                        console.log('Added wait count.');
+                        console.log('Added wait count:', waitCount);
 
                         if (waitCount === 25) {
                             console.log('Timed out.');
