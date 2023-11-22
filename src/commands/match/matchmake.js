@@ -300,8 +300,8 @@ module.exports = {
 
         console.log('Created report data:', reportData);
 
-        if (matchMode.includes('unranked')) {
-            
+        if (!matchMode.includes('unranked')) {
+
             // Add match config data to embed.
             matchmakingCompleteEmbed.addFields(
                 { name: 'Set Length', value: 'Best of 5', inline: true },
