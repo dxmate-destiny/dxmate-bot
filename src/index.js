@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('node:path');
-const { Client, GatewayIntentBits, Collection, Events, EmbedBuilder, Emoji, ChannelType } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Events, EmbedBuilder, ChannelType, Status } = require('discord.js');
 const { default: axios } = require('axios');
 const { setTimeout } = require('timers/promises');
 const { convertNumberToEmoji } = require('../modules/util');
@@ -18,7 +18,7 @@ const onlinePlayerCounterVoiceChannelId = process.env.ONLINE_PLAYER_COUNTER_VOIC
 const onlinePlayerCountInterval = 2 * 60 * 1000;
 
 // Create Discord Bot client instance.
-const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions] });
+const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildPresences] });
 
 // Create collection instance.
 client.commands = new Collection();
@@ -530,7 +530,7 @@ async function updateOnlineCount() {
     if (!voiceChannel || voiceChannel.type !== ChannelType.GuildVoice) return console.error('Specified voice channel not found.');
 
     // Get online player count.
-    const onlineCount = guild.members.cache.filter(member => member.presence.status === 'online').size;
+    const onlineCount = guild.members.cache.filter(member => member.presence.status === Stat).size;
     console.log('Retrieved online player count:', onlineCount);
 
     // Update online player count.
