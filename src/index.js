@@ -372,14 +372,14 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
             // Save updated skill.
             for (let i = 0; i < afterSkill.winner.length; i++) {
                 await axios.post(dxmateApiBaseUrl + '/players/skill/doubles/update', {
-                    discordId: discordIds.winner[i],
+                    discordId: discordId.winner[i],
                     skill: afterSkill.winner[i]
                 });
             }
 
             for (let i = 0; i < afterSkill.loser.length; i++) {
                 await axios.post(dxmateApiBaseUrl + '/players/skill/doubles/update', {
-                    discordId: discordIds.loser[i],
+                    discordId: discordId.loser[i],
                     skill: afterSkill.loser[i]
                 });
             }
@@ -387,15 +387,15 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
             console.log('Saved updated skill.');
 
             // Add Ranked Doubles count.
-            for (let i = 0; i < discordIds.winner.length; i++) {
+            for (let i = 0; i < discordId.winner.length; i++) {
                 await axios.post(dxmateApiBaseUrl + '/players/ranked-match-count/doubles/add', {
-                    discordId: discordIds.winner[i]
+                    discordId: discordId.winner[i]
                 });
             }
 
-            for (let i = 0; i < discordIds.loser.length; i++) {
+            for (let i = 0; i < discordId.loser.length; i++) {
                 await axios.post(dxmateApiBaseUrl + '/players/ranked-match-count/doubles/add', {
-                    discordId: discordIds.loser[i]
+                    discordId: discordId.loser[i]
                 });
             }
 
@@ -462,7 +462,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
             for (let i = 0; i < 2; i++) {
                 matchResultEmbed.addFields(
-                    { name: `Winner ${convertNumberToEmoji(i + 1)}`, value: `<@${discordIds.winner[i]}>`, inline: true },
+                    { name: `Winner ${convertNumberToEmoji(i + 1)}`, value: `<@${discordId.winner[i]}>`, inline: true },
                     { name: 'Before', value: `${beforeRankData.winner[i].points} RP`, inline: true },
                     { name: 'After', value: `${afterRankData.winner[i].points} RP`, inline: true }
                 );
@@ -470,7 +470,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
             for (let i = 0; i < 2; i++) {
                 matchResultEmbed.addFields(
-                    { name: `Loser ${convertNumberToEmoji(i + 1)}`, value: `<@${discordIds.loser[i]}>`, inline: true },
+                    { name: `Loser ${convertNumberToEmoji(i + 1)}`, value: `<@${discordId.loser[i]}>`, inline: true },
                     { name: 'Before', value: `${beforeRankData.loser[i].points} RP`, inline: true },
                     { name: 'After', value: `${afterRankData.loser[i].points} RP`, inline: true }
                 );
