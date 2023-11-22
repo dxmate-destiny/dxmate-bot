@@ -1,6 +1,6 @@
 const fs = require('fs');
 const path = require('node:path');
-const { Client, GatewayIntentBits, Collection, Events, EmbedBuilder, Emoji } = require('discord.js');
+const { Client, GatewayIntentBits, Collection, Events, EmbedBuilder, Emoji, ChannelType } = require('discord.js');
 const { default: axios } = require('axios');
 const { setTimeout } = require('timers/promises');
 const { convertNumberToEmoji } = require('../modules/util');
@@ -527,7 +527,7 @@ async function updateOnlineCount() {
     // Get voice channel to display online player count.
     const voiceChannel = guild.channels.cache.get(onlinePlayerCounterVoiceChannelId);
 
-    if (!voiceChannel || voiceChannel.type !== 'voice') return console.error('Specified voice channel not found.');
+    if (!voiceChannel || voiceChannel.type !== ChannelType.GuildVoice) return console.error('Specified voice channel not found.');
 
     // Get online player count.
     const onlineCount = guild.members.cache.filter(member => member.presence.status !== 'offline').size;
