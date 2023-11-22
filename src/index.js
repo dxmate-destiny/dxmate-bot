@@ -528,6 +528,7 @@ async function updateOnlineCount() {
 
     // Get voice channel to display online player count.
     const voiceChannel = guild.channels.cache.get(onlinePlayerCounterVoiceChannelId);
+    console.log('Voice Channel:', voiceChannel);
 
     if (!voiceChannel || !voiceChannel.type !== 'voice') return console.error('Specified voice channel not found.');
 
