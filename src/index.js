@@ -8,6 +8,15 @@ const { convertNumberToEmoji } = require('../modules/util');
 // Get DXmate API base URL.
 const dxmateApiBaseUrl = process.env.DXMATE_API_BASE_URL;
 
+// Get Guild ID.
+const guildId = process.env.GUILD_ID;
+
+// Get Online Player Counter voice channel ID.
+const onlinePlayerCounterVoiceChannelId = process.env.ONLINE_PLAYER_COUNTER_VOICE_CHANNEL_ID;
+
+// Get Online Player Count interval.
+const onlinePlayerCountInterval = 15 * 60 * 1000;
+
 // Create Discord Bot client instance.
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions] });
 
@@ -51,6 +60,9 @@ for (const commandDir of commandDirsDir) {
 
 client.once(Events.ClientReady, () => {
     console.log('DXmate Bot is ready!');
+
+    // Count Online Player every 15 min.
+    setInterval(updateOnlineCount, onlinePlayerCountInterval);
 });
 
 client.on(Events.InteractionCreate, async (interaction) => {
@@ -504,6 +516,26 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         }
     }
 });
+
+async function updateOnlineCount() {
+
+    // Get guild.
+    const guild = client.guilds.cache.get(guildId);
+
+    if (!guild) return console.error('Specified Discord server not found.');
+
+    // Get voice channel to display online player count.
+    const voiceChannel = guild.channels.cache.get(onlinePlayerCounterVoiceChannelId);
+
+    if (!voiceChannel || !voiceChannel.type !== 'voice') return console.error('Specified voice channel not found.');
+
+    // Get online player count.
+    const onlineCount = guild.members.cache.filter(member => member.presence.status !== 'offline').size;
+    console.log('Retrieved online player count:', onlineCount);
+
+    // Update online player count.
+    await voiceChannel.setName(`🟢 ${onlineCount}`);
+}
 
 // Log in to Discord.
 client.login(process.env.DISCORD_BOT_TOKEN);
