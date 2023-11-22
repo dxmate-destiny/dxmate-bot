@@ -250,7 +250,7 @@ module.exports = {
             roomData.doublesConnectCode = createDoublesConnectCodeResponse.data;
         }
 
-        let reportData = { roomId, matchMode, roomData };
+        let reportData = { roomId, matchMode, roomData, host: discordUserData.id };
 
         // Create matchmaking complete embed message.
         let matchmakingCompleteEmbed = new EmbedBuilder()

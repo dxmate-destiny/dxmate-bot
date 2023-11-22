@@ -78,7 +78,6 @@ client.on(Events.InteractionCreate, async (interaction) => {
 });
 
 client.on(Events.MessageReactionAdd, async (reaction, user) => {
-    console.log(`${user.tag} added reaction: ${reaction.emoji.name}`);
 
     if (user.bot) return;
 
@@ -89,17 +88,17 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
     if (!message.interaction) return;
 
-    // Get command.
+    // Get command name.
     const commandName = message.interaction.commandName;
-    console.log('Retrieved Command Name:', commandName);
+    console.log('Retrieved command name:', commandName);
 
     if (commandName !== 'matchmake') return;
 
-    // Get Report ID (Message ID).
+    // Get report ID.
     const reportId = message.id;
-    console.log('Retrieved Report ID:', reportId);
+    console.log('Retrieved report ID:', reportId);
 
-    // Get Report data.
+    // Get report data.
     const getReportDataResponse = await axios.get(dxmateApiBaseUrl + `/reports/${reportId}`);
     console.log('Retrieved Report data:', getReportDataResponse.data);
 
@@ -108,31 +107,27 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     if (getReportDataResponse.data.matchMode.includes('unranked')) return;
 
     // Get room data.
-    const getRoomDataResponse = await axios.get(dxmateApiBaseUrl + `/rooms/${getReportDataResponse.data.roomId}`);
-    console.log('Retrieved room data:', getRoomDataResponse.data);
+    const roomData = getReportDataResponse.data.roomData;
+    console.log('Retrieved Room data:', roomData);
 
-    // Get my player data.
-    const myPlayerData = getRoomDataResponse.data.players.find(player => player.discordUserData.id === user.id);
-    console.log('Retrieved my player data:', myPlayerData);
-    
-    if (!myPlayerData.isHost) return;
+    let isHost = getReportDataResponse.data.host === user.id;
 
-    let matchResult;
+    if (!isHost) return;
+
+    let matchResult = '';
 
     if (getReportDataResponse.data.matchMode.includes('singles')) {
+
         // Get match result.
-        while(!matchResult) {
+        while (!matchResult) {
             message.reactions.cache.forEach(reaction => {
                 if (reaction.count === 3) {
                     if (reaction.emoji.name === '1️⃣' || reaction.emoji.name === '2️⃣' || reaction.emoji.name === '❌') {
-                        // Find a reaction with 3 reactions.
                         matchResult = reaction.emoji.name;
                     }
-                    
                 }
             });
 
-            // If there are no match results, wait 5 sec.
             if (!matchResult) await setTimeout(5000);
         }
 
@@ -140,38 +135,46 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
         if (matchResult === '1️⃣' || matchResult === '2️⃣') {
 
-            let discordIds = {};
+            let discordId = {
+                winner: '',
+                loser: ''
+            };
 
             // Get Discord ID.
             if (matchResult === '1️⃣') {
-                console.log('Winner was determined:', getReportDataResponse.data['1️⃣']);
-
-                discordIds.winner = getReportDataResponse.data['1️⃣'];
-                discordIds.loser = getReportDataResponse.data['2️⃣'];
+                discordId.winner = getReportDataResponse.data['1️⃣'];
+                discordId.loser = getReportDataResponse.data['2️⃣'];
             } else if (matchResult === '2️⃣') {
-                console.log('Winner was determined:', getReportDataResponse.data['2️⃣']);
-
-                discordIds.winner = getReportDataResponse.data['2️⃣'];
-                discordIds.loser = getReportDataResponse.data['1️⃣'];
+                discordId.winner = getReportDataResponse.data['2️⃣'];
+                discordId.loser = getReportDataResponse.data['1️⃣'];
             }
 
-            console.log('Retrived Discord ID:', discordIds);
+            console.log('Retrieved Discord ID:', discordId);
 
-            let playerData = {};
+            let playerData = {
+                winner: {},
+                loser: {}
+            };
 
-            // Get Player data.
-            playerData.winner = getRoomDataResponse.data.players.find(player => player.discordUserData.id === discordIds.winner);
-            playerData.loser = getRoomDataResponse.data.players.find(player => player.discordUserData.id === discordIds.loser);
-            console.log('Retrieved Player data:', playerData);
+            // Get player data.
+            playerData.winner = roomData.players.find(player => player.discordUserData.id === discordId.winner);
+            playerData.loser = roomData.players.find(player => player.discordUserData.id === discordId.loser);
+            console.log('Retrieved player data:', playerData);
 
-            let beforeSkill = {};
+            let beforeSkill = {
+                winner: {},
+                loser: {}
+            };
 
             // Get before skill.
             beforeSkill.winner = playerData.winner.dxmatePlayerData.skill.singles;
             beforeSkill.loser = playerData.loser.dxmatePlayerData.skill.singles;
             console.log('Retrieved before skill:', beforeSkill);
 
-            let afterSkill = {};
+            let afterSkill = {
+                winner: {},
+                loser: {}
+            };
 
             // Update skill.
             const updateSkillResponse = await axios.post(dxmateApiBaseUrl + '/skill/singles/update', {
@@ -185,12 +188,12 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
             // Save updated skill.
             await axios.post(dxmateApiBaseUrl + '/players/skill/singles/update', {
-                discordId: discordIds.winner,
+                discordId: discordId.winner,
                 skill: afterSkill.winner
             });
 
             await axios.post(dxmateApiBaseUrl + '/players/skill/singles/update', {
-                discordId: discordIds.loser,
+                discordId: discordId.loser,
                 skill: afterSkill.loser
             });
 
@@ -198,16 +201,19 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
             // Add Ranked Singles match count.
             await axios.post(dxmateApiBaseUrl + '/players/ranked-match-count/singles/add', {
-                discordId: discordIds.winner
+                discordId: discordId.winner
             });
 
             await axios.post(dxmateApiBaseUrl + '/players/ranked-match-count/singles/add', {
-                discordId: discordIds.loser
+                discordId: discordId.loser
             });
 
             console.log('Added Ranked Singles match count.');
 
-            let beforeRankData = {};
+            let beforeRankData = {
+                winner: {},
+                loser: {}
+            };
 
             // Get before Rank data.
             beforeRankData.winner = playerData.winner.rankData;
@@ -215,7 +221,10 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
             console.log('Retrieved before Rank data:', beforeRankData);
 
-            let afterRankData = {};
+            let afterRankData = {
+                winner: {},
+                loser: {}
+            };
 
             // Get after Rank data.
             const getWinnerAfterRankDataResponse = await axios.get(dxmateApiBaseUrl + '/rank', {
@@ -255,10 +264,10 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
             .setColor(0x0099FF)
             .setTitle('Ranked Singles Result')
             .addFields(
-                { name: 'Winner', value: `<@${discordIds.winner}>`, inline: true },
+                { name: 'Winner', value: `<@${discordId.winner}>`, inline: true },
                 { name: 'Before', value: `${beforeRankData.winner.points} RP`, inline: true },
                 { name: 'After', value: `${afterRankData.winner.points} RP`, inline: true },
-                { name: 'Loser', value: `<@${discordIds.loser}>`, inline: true },
+                { name: 'Loser', value: `<@${discordId.loser}>`, inline: true },
                 { name: 'Before', value: `${beforeRankData.loser.points} RP`, inline: true },
                 { name: 'After', value: `${afterRankData.loser.points} RP`, inline: true },
             );
@@ -268,8 +277,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
             // Send match result embed.
             return await channel.send({ embeds: [matchResultEmbed] });
-        } else if (matchResult === '❌') {
-
+        } else {
             // Delete room.
             await axios.post(dxmateApiBaseUrl + '/rooms/delete', {
                 roomId: getReportDataResponse.data.roomId
@@ -291,18 +299,17 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
             return await channel.send(`<@${getReportDataResponse.data['1️⃣']}> <@${getReportDataResponse.data['2️⃣']}> Canceled match.`);
         }
     } else {
+
         // Get match result.
-        while(!matchResult) {
+        while (!matchResult) {
             message.reactions.cache.forEach(reaction => {
-                if (reaction.count === 5) {
+                if (reaction.count === 3) {
                     if (reaction.emoji.name === '🔴' || reaction.emoji.name === '🔵' || reaction.emoji.name === '❌') {
-                        // Find a reaction with 5 reactions.
                         matchResult = reaction.emoji.name;
                     }
                 }
             });
 
-            // If there are no match results, wait 5 sec.
             if (!matchResult) await setTimeout(5000);
         }
 
@@ -310,25 +317,20 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
         if (matchResult === '🔴' || matchResult === '🔵') {
 
-            let discordIds = {
+            let discordId = {
                 winner: [],
                 loser: []
             };
 
-            // Get Discord ID.
             if (matchResult === '🔴') {
-                console.log('Winner was determined:', getReportDataResponse.data['🔴']);
-
-                discordIds.winner = [getReportDataResponse.data['🔴'][0], getReportDataResponse.data['🔴'][1]];
-                discordIds.loser = [getReportDataResponse.data['🔵'][0], getReportDataResponse.data['🔵'][1]];
-            } else if (matchResult === '🔵') {
-                console.log('Winner was determined:', getReportDataResponse.data['🔵']);
-
-                discordIds.winner = [getReportDataResponse.data['🔵'][0], getReportDataResponse.data['🔵'][1]];
-                discordIds.loser = [getReportDataResponse.data['🔴'][0], getReportDataResponse.data['🔴'][1]];
+                discordId.winner = [ getReportDataResponse.data['🔴'][0], getReportDataResponse.data['🔴'][1] ];
+                discordId.loser = [ getReportDataResponse.data['🔵'][0], getReportDataResponse.data['🔵'][1] ];
+            } else {
+                discordId.winner = [ getReportDataResponse.data['🔵'][0], getReportDataResponse.data['🔵'][1] ];
+                discordId.loser = [ getReportDataResponse.data['🔴'][0], getReportDataResponse.data['🔴'][1] ];
             }
 
-            console.log('Retrieved Discord ID:', discordIds);
+            console.log('Retrieved Discord ID:', discordId);
 
             let playerData = {
                 winner: [],
@@ -336,8 +338,8 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
             };
 
             // Get Player Data.
-            playerData.winner = discordIds.winner.map(discordId => getRoomDataResponse.data.players.find(player => player.discordUserData.id === discordId));
-            playerData.loser = discordIds.loser.map(discordId => getRoomDataResponse.data.players.find(player => player.discordUserData.id === discordId));
+            playerData.winner = discordId.winner.map(dId => roomData.players.find(player => player.discordUserData.id === dId));
+            playerData.loser = discordId.loser.map(dId => roomData.players.find(player => player.discordUserData.id === dId));
             console.log('Retrieved Player data:', playerData);
 
             let beforeSkill = {
@@ -479,7 +481,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
             // Send match result embed.
             return await channel.send({ embeds: [matchResultEmbed] });
-        } else if (matchResult === '❌') {
+        } else {
             // Delete room.
             await axios.post(dxmateApiBaseUrl + '/rooms/delete', {
                 roomId: getReportDataResponse.data.roomId
