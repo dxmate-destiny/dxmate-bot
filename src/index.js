@@ -303,7 +303,7 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
         // Get match result.
         while (!matchResult) {
             message.reactions.cache.forEach(reaction => {
-                if (reaction.count === 3) {
+                if (reaction.count === 5) {
                     if (reaction.emoji.name === '🔴' || reaction.emoji.name === '🔵' || reaction.emoji.name === '❌') {
                         matchResult = reaction.emoji.name;
                     }
