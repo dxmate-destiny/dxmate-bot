@@ -10,11 +10,9 @@ const dxmateApiBaseUrl = process.env.DXMATE_API_BASE_URL;
 
 // Get Guild ID.
 const guildId = process.env.GUILD_ID;
-console.log('Guild ID:', guildId);
 
 // Get Online Player Counter voice channel ID.
 const onlinePlayerCounterVoiceChannelId = process.env.ONLINE_PLAYER_COUNTER_VOICE_CHANNEL_ID;
-console.log('Voice Channel ID:', onlinePlayerCounterVoiceChannelId);
 
 // Get Online Player Count interval.
 const onlinePlayerCountInterval = 2 * 60 * 1000;
@@ -528,9 +526,8 @@ async function updateOnlineCount() {
 
     // Get voice channel to display online player count.
     const voiceChannel = guild.channels.cache.get(onlinePlayerCounterVoiceChannelId);
-    console.log('Voice Channel:', voiceChannel);
 
-    if (!voiceChannel || !voiceChannel.type !== 'voice') return console.error('Specified voice channel not found.');
+    if (!voiceChannel || voiceChannel.type !== 'voice') return console.error('Specified voice channel not found.');
 
     // Get online player count.
     const onlineCount = guild.members.cache.filter(member => member.presence.status !== 'offline').size;
