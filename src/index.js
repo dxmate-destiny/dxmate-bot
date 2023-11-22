@@ -10,12 +10,14 @@ const dxmateApiBaseUrl = process.env.DXMATE_API_BASE_URL;
 
 // Get Guild ID.
 const guildId = process.env.GUILD_ID;
+console.log('Guild ID:', guildId);
 
 // Get Online Player Counter voice channel ID.
 const onlinePlayerCounterVoiceChannelId = process.env.ONLINE_PLAYER_COUNTER_VOICE_CHANNEL_ID;
+console.log('Voice Channel ID:', onlinePlayerCounterVoiceChannelId);
 
 // Get Online Player Count interval.
-const onlinePlayerCountInterval = 15 * 60 * 1000;
+const onlinePlayerCountInterval = 2 * 60 * 1000;
 
 // Create Discord Bot client instance.
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions] });
