@@ -15,7 +15,7 @@ const guildId = process.env.GUILD_ID;
 const onlinePlayerCounterVoiceChannelId = process.env.ONLINE_PLAYER_COUNTER_VOICE_CHANNEL_ID;
 
 // Get Online Player Count interval.
-const onlinePlayerCountInterval = 2 * 60 * 1000;
+const onlinePlayerCountInterval = 15 * 60 * 1000;
 
 // Create Discord Bot client instance.
 const client = new Client({ intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildMessages, GatewayIntentBits.GuildMessageReactions, GatewayIntentBits.GuildPresences, GatewayIntentBits.GuildMembers, GatewayIntentBits.MessageContent] });
