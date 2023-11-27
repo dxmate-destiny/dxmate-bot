@@ -4,6 +4,15 @@ const { REST, Routes } = require('discord.js');
 
 const commands = [];
 
+const botToken = process.env.DISCORD_BOT_TOKEN;
+console.log('Bot Token:', botToken);
+
+const clientId = process.env.DISCORD_BOT_CLIENT_ID;
+console.log('Client ID:', clientId);
+
+const guildId = process.env.GUILD_ID;
+console.log('Guild ID:', guildId);
+
 // Get command directories directory path.
 const commandDirsDirPath = path.join(__dirname, 'commands');
 console.log('Retrieved command dirs dir path:', commandDirsDirPath);
@@ -39,16 +48,16 @@ for (const commandDir of commandDirsDir) {
 }
 
 // Create rest instance using token.
-const rest = new REST().setToken(process.env.DISCORD_BOT_TOKEN);
+const rest = new REST().setToken(botToken);
 
 // Deploy commands.
 (async () => {
     try {
         console.log(`Started refreshing ${commands.length} application (/) commands.`);
-
+        
         // The put method is used to fully refresh all commands in the guild with the current set.
 		const data = await rest.put(
-			Routes.applicationGuildCommands(process.env.DISCORD_BOT_CLIENT_ID, process.env.DXMATE_DISCORD_SERVER_GUILD_ID),
+			Routes.applicationGuildCommands(clientId, guildId),
 			{ body: commands },
 		);
 
