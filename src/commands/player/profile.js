@@ -72,10 +72,8 @@ module.exports = {
         .addFields(
             { name: 'Singles Rank', value: getSinglesRankDataResponse.data.name, inline: true },
             { name: 'Singles Rank Points', value: getSinglesRankDataResponse.data.points + ' RP', inline: true },
-            { name: 'Ranked Singles Count', value: getDxmatePlayerDataResponse.data.rankedModeMatchCount.singles.toString(), inline: true },
             { name: 'Doubles Rank', value: getDoublesRankDataResponse.data.name, inline: true },
             { name: 'Doubles Rank Points', value: getDoublesRankDataResponse.data.points + ' RP', inline: true },
-            { name: 'Ranked Doubles Count', value: getDxmatePlayerDataResponse.data.rankedModeMatchCount.doubles.toString(), inline: true },
             { name: 'Slippi Connect Code', value: getDxmatePlayerDataResponse.data.slippiConnectCode, inline: true },
             { name: 'Current Region', value: regionChoices[getDxmatePlayerDataResponse.data.region], inline: true }
         );
