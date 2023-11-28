@@ -213,17 +213,6 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
 
             console.log('Saved updated skill.');
 
-            // Add Ranked Singles match count.
-            await axios.post(dxmateApiBaseUrl + '/players/ranked-match-count/singles/add', {
-                discordId: discordId.winner
-            });
-
-            await axios.post(dxmateApiBaseUrl + '/players/ranked-match-count/singles/add', {
-                discordId: discordId.loser
-            });
-
-            console.log('Added Ranked Singles match count.');
-
             let beforeRankData = {
                 winner: {},
                 loser: {}
