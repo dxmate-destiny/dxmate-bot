@@ -123,6 +123,8 @@ client.on(Events.MessageReactionAdd, async (reaction, user) => {
     console.log('Retrieved Room data:', roomData);
 
     let isHost = getReportDataResponse.data.host === user.id;
+    console.log('Discord ID:', user.id);
+    console.log('Host:', isHost);
 
     if (!isHost) return;
 
