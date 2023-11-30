@@ -29,12 +29,16 @@ module.exports = {
 
         if (matchMode === 'singles') {
             // Get Singles Top 50 players.
-            const getTop16PlayersResponse = await axios.get(dxmateApiBaseUrl + '/leaderboard/singles');
+            const getSinglesTop16PlayersResponse = await axios.get(dxmateApiBaseUrl + '/leaderboard/singles');
             
-            top16Players = getTop16PlayersResponse.data;
+            top16Players = getSinglesTop16PlayersResponse.data;
             console.log('Retrieved Singles Top 16 players:', top16Players);
         } else {
-            // TODO: Doubles
+            // Get Doubles Top 16 players.
+            const getDoublesTop16PlayersResponse = await axios.get(dxmateApiBaseUrl + '/leaderboard/doubles');
+
+            top16Players = getDoublesTop16PlayersResponse.data;
+            console.log('Retrieved Doubles Top 16 plaeyrs:', top16Players);
         }
 
         // Create leaderboard embed.
